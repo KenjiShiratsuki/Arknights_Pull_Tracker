@@ -8,6 +8,5 @@ func pushState(newState State, log *Log) {
 	} else {
 		log.history = append(log.history, newState)
 	}
-
 	log.currentState = len(log.history) - 1
 }

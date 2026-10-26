@@ -16,7 +16,7 @@ func initializeState() *Log {
 	initState := State{
 		threeStarCount: 0,
 		fourStarCount:  0,
-		fiveStarCount:  9,
+		fiveStarCount:  0,
 		sixStarCount:   0,
 		pityCount:      0,
 		totalPullCount: 0,
@@ -47,17 +47,17 @@ func (s State) sixStarChance() int {
 
 type UI struct {
 	totalPulls    *widget.Label
-	threeStars    *widget.Label
-	fourStars     *widget.Label
-	fiveStars     *widget.Label
-	sixStars      *widget.Label
 	pityCounter   *widget.Label
 	sixStarChance *widget.Label
 	totalNew      *widget.Label
-	threeNew      *widget.Label
-	fourNew       *widget.Label
-	fiveNew       *widget.Label
-	sixNew        *widget.Label
+	threeStars    *widget.Button
+	fourStars     *widget.Button
+	fiveStars     *widget.Button
+	sixStars      *widget.Button
+	threeNew      *widget.Button
+	fourNew       *widget.Button
+	fiveNew       *widget.Button
+	sixNew        *widget.Button
 }
 
 func initializeApp(log *Log) fyne.App {
@@ -65,123 +65,86 @@ func initializeApp(log *Log) fyne.App {
 	w := a.NewWindow("Arknights Pull Tracker by PhantomTheKitsune")
 	ui := &UI{
 		totalPulls:    widget.NewLabel(fmt.Sprintf("Total Pulls: %d", 0)),
-		threeStars:    widget.NewLabel(fmt.Sprintf("3-Stars: %d", 0)),
-		fourStars:     widget.NewLabel(fmt.Sprintf("4-Stars: %d", 0)),
-		fiveStars:     widget.NewLabel(fmt.Sprintf("5-Stars: %d", 0)),
-		sixStars:      widget.NewLabel(fmt.Sprintf("6-Stars: %d", 0)),
 		pityCounter:   widget.NewLabel(fmt.Sprintf("Pity Count: %d", 0)),
 		sixStarChance: widget.NewLabel(fmt.Sprintf("6-Star Rate: %d%%", 2)),
 		totalNew:      widget.NewLabel(fmt.Sprintf("(%d new!)", 0)),
-		threeNew:      widget.NewLabel(fmt.Sprintf("(%d new!)", 0)),
-		fourNew:       widget.NewLabel(fmt.Sprintf("(%d new!)", 0)),
-		fiveNew:       widget.NewLabel(fmt.Sprintf("(%d new!)", 0)),
-		sixNew:        widget.NewLabel(fmt.Sprintf("(%d new!)", 0)),
 	}
-	w.SetContent(container.NewGridWithColumns(4,
-		container.NewVBox(
-			ui.totalPulls,
-			ui.threeStars,
-			ui.fourStars,
-			ui.fiveStars,
-			ui.sixStars,
-		),
-		container.NewVBox(
-			ui.pityCounter,
-			//Three-star, not new.
-			widget.NewButton("+", func() {
-				newState := log.history[log.currentState]
-				newState.threeStarCount++
-				newState.pityCount++
-				newState.totalPullCount++
-				pushState(newState, log)
-				updateUI(log, ui)
-			},
-			),
-			//Four-star, not new.
-			widget.NewButton("+", func() {
-				newState := log.history[log.currentState]
-				newState.fourStarCount++
-				newState.pityCount++
-				newState.totalPullCount++
-				pushState(newState, log)
-				updateUI(log, ui)
-			},
-			),
-			//Five-star, not new.
-			widget.NewButton("+", func() {
-				newState := log.history[log.currentState]
-				newState.fiveStarCount++
-				newState.pityCount++
-				newState.totalPullCount++
-				pushState(newState, log)
-				updateUI(log, ui)
-			},
-			),
-			//Six-star, not new.
-			widget.NewButton("+", func() {
-				newState := log.history[log.currentState]
-				newState.sixStarCount++
-				newState.pityCount = 0
-				newState.totalPullCount++
-				pushState(newState, log)
-				updateUI(log, ui)
-			},
-			),
-		),
-		container.NewVBox(
-			ui.sixStarChance,
-			//Three-star, new.
-			widget.NewButton("+", func() {
-				newState := log.history[log.currentState]
-				newState.threeStarNew++
-				newState.pityCount++
-				newState.totalPullCount++
-				newState.totalNew++
-				pushState(newState, log)
-				updateUI(log, ui)
-			},
-			),
-			//Four-star, new.
-			widget.NewButton("+", func() {
-				newState := log.history[log.currentState]
-				newState.fourStarNew++
-				newState.pityCount++
-				newState.totalPullCount++
-				newState.totalNew++
-				pushState(newState, log)
-				updateUI(log, ui)
-			},
-			),
-			//Five-star, new.
-			widget.NewButton("+", func() {
-				newState := log.history[log.currentState]
-				newState.fiveStarNew++
-				newState.pityCount++
-				newState.totalPullCount++
-				newState.totalNew++
-				pushState(newState, log)
-				updateUI(log, ui)
-			},
-			),
-			//Six-star, new.
-			widget.NewButton("+", func() {
-				newState := log.history[log.currentState]
-				newState.sixStarNew++
-				newState.pityCount = 0
-				newState.totalPullCount++
-				newState.totalNew++
-				pushState(newState, log)
-				updateUI(log, ui)
-			},
-			),
-		),
-		container.NewVBox(
-			ui.totalNew,
-			ui.threeNew,
-			ui.fourNew,
-			ui.fiveNew,
-			ui.sixNew,
-		)))
+	w.SetContent(container.NewVBox(
+		container.NewHBox(ui.pityCounter, ui.sixStarChance),
+		container.NewHBox(ui.sixStars, ui.sixNew),
+		container.NewHBox(ui.fiveStars, ui.fiveNew),
+		container.NewHBox(ui.fourStars, ui.fourNew),
+		container.NewHBox(ui.threeStars, ui.threeNew),
+		container.NewHBox(ui.totalPulls, ui.totalNew),
+	))
+	ui.sixStars = widget.NewButton("6-Stars: 0", func() {
+		newState := log.history[log.currentState]
+		newState.sixStarCount++
+		newState.pityCount = 0
+		newState.totalPullCount++
+		pushState(newState, log)
+		updateUI(log, ui)
+	})
+	ui.sixNew = widget.NewButton("(0 new!)", func() {
+		newState := log.history[log.currentState]
+		newState.sixStarCount++
+		newState.sixStarNew++
+		newState.pityCount = 0
+		newState.totalPullCount++
+		pushState(newState, log)
+		updateUI(log, ui)
+	})
+	ui.fiveStars = widget.NewButton("5-Stars: 0", func() {
+		newState := log.history[log.currentState]
+		newState.fiveStarCount++
+		newState.pityCount++
+		newState.totalPullCount++
+		pushState(newState, log)
+		updateUI(log, ui)
+	})
+	ui.fiveNew = widget.NewButton("(0 new!)", func() {
+		newState := log.history[log.currentState]
+		newState.fiveStarCount++
+		newState.fiveStarNew++
+		newState.pityCount++
+		newState.totalPullCount++
+		pushState(newState, log)
+		updateUI(log, ui)
+	})
+	ui.fourStars = widget.NewButton("4-Stars: 0", func() {
+		newState := log.history[log.currentState]
+		newState.fourStarCount++
+		newState.pityCount++
+		newState.totalPullCount++
+		pushState(newState, log)
+		updateUI(log, ui)
+	})
+	ui.fourNew = widget.NewButton("(0 new!)", func() {
+		newState := log.history[log.currentState]
+		newState.fourStarCount++
+		newState.fourStarNew++
+		newState.pityCount++
+		newState.totalPullCount++
+		pushState(newState, log)
+		updateUI(log, ui)
+	})
+	ui.threeStars = widget.NewButton("3-Stars: 0", func() {
+		newState := log.history[log.currentState]
+		newState.threeStarCount++
+		newState.pityCount++
+		newState.totalPullCount++
+		pushState(newState, log)
+		updateUI(log, ui)
+	})
+	ui.threeNew = widget.NewButton("(0 new!)", func() {
+		newState := log.history[log.currentState]
+		newState.threeStarCount++
+		newState.threeStarNew++
+		newState.pityCount++
+		newState.totalPullCount++
+		pushState(newState, log)
+		updateUI(log, ui)
+	})
 	w.Show()
 	return a
 }
