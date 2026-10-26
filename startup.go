@@ -69,14 +69,6 @@ func initializeApp(log *Log) fyne.App {
 		sixStarChance: widget.NewLabel(fmt.Sprintf("6-Star Rate: %d%%", 2)),
 		totalNew:      widget.NewLabel(fmt.Sprintf("(%d new!)", 0)),
 	}
-	w.SetContent(container.NewVBox(
-		container.NewHBox(ui.pityCounter, ui.sixStarChance),
-		container.NewHBox(ui.sixStars, ui.sixNew),
-		container.NewHBox(ui.fiveStars, ui.fiveNew),
-		container.NewHBox(ui.fourStars, ui.fourNew),
-		container.NewHBox(ui.threeStars, ui.threeNew),
-		container.NewHBox(ui.totalPulls, ui.totalNew),
-	))
 	ui.sixStars = widget.NewButton("6-Stars: 0", func() {
 		newState := log.history[log.currentState]
 		newState.sixStarCount++
@@ -91,6 +83,7 @@ func initializeApp(log *Log) fyne.App {
 		newState.sixStarNew++
 		newState.pityCount = 0
 		newState.totalPullCount++
+		newState.totalNew++
 		pushState(newState, log)
 		updateUI(log, ui)
 	})
@@ -108,6 +101,7 @@ func initializeApp(log *Log) fyne.App {
 		newState.fiveStarNew++
 		newState.pityCount++
 		newState.totalPullCount++
+		newState.totalNew++
 		pushState(newState, log)
 		updateUI(log, ui)
 	})
@@ -125,6 +119,7 @@ func initializeApp(log *Log) fyne.App {
 		newState.fourStarNew++
 		newState.pityCount++
 		newState.totalPullCount++
+		newState.totalNew++
 		pushState(newState, log)
 		updateUI(log, ui)
 	})
@@ -142,9 +137,19 @@ func initializeApp(log *Log) fyne.App {
 		newState.threeStarNew++
 		newState.pityCount++
 		newState.totalPullCount++
+		newState.totalNew++
 		pushState(newState, log)
 		updateUI(log, ui)
 	})
+	w.SetContent(container.NewVBox(
+		container.NewHBox(ui.pityCounter, ui.sixStarChance),
+		container.NewHBox(ui.sixStars, ui.sixNew),
+		container.NewHBox(ui.fiveStars, ui.fiveNew),
+		container.NewHBox(ui.fourStars, ui.fourNew),
+		container.NewHBox(ui.threeStars, ui.threeNew),
+		container.NewHBox(ui.totalPulls, ui.totalNew),
+	))
+	updateUI(log, ui)
 	w.Show()
 	return a
 }

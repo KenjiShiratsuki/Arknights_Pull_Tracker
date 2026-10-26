@@ -17,4 +17,5 @@ func updateUI(log *Log, ui *UI) {
 	ui.fiveNew.SetText(fmt.Sprintf("(%d new!)", state.fiveStarNew))
 	ui.sixNew.SetText(fmt.Sprintf("(%d new!)", state.sixStarNew))
 	ui.sixStarChance.SetText(fmt.Sprintf("6* rate %d%%", state.sixStarChance()))
+	ui.totalNew.SetText(fmt.Sprintf("(%d new!)", state.totalNew))
 }
