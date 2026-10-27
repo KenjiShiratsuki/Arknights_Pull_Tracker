@@ -58,6 +58,9 @@ type UI struct {
 	fourNew       *widget.Button
 	fiveNew       *widget.Button
 	sixNew        *widget.Button
+	undo          *widget.Button
+	redo          *widget.Button
+	reset         *widget.Button
 }
 
 func initializeApp(log *Log) fyne.App {
@@ -141,7 +144,25 @@ func initializeApp(log *Log) fyne.App {
 		pushState(newState, log)
 		updateUI(log, ui)
 	})
+	ui.undo = widget.NewButton("undo", func() {
+		if log.currentState > 0 {
+			log.currentState--
+			updateUI(log, ui)
+		}
+	})
+	ui.redo = widget.NewButton("redo", func() {
+		if log.currentState < len(log.history)-1 {
+			log.currentState++
+			updateUI(log, ui)
+		}
+	})
+	ui.reset = widget.NewButton("reset", func() {
+		newState := State{}
+		pushState(newState, log)
+		updateUI(log, ui)
+	})
 	w.SetContent(container.NewVBox(
+		container.NewHBox(ui.undo, ui.redo, ui.reset),
 		container.NewHBox(ui.pityCounter, ui.sixStarChance),
 		container.NewHBox(ui.sixStars, ui.sixNew),
 		container.NewHBox(ui.fiveStars, ui.fiveNew),
