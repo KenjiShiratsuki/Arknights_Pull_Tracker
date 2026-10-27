@@ -18,4 +18,21 @@ func updateUI(log *Log, ui *UI) {
 	ui.sixNew.SetText(fmt.Sprintf("(%d new!)", state.sixStarNew))
 	ui.sixStarChance.SetText(fmt.Sprintf("6* rate %d%%", state.sixStarChance()))
 	ui.totalNew.SetText(fmt.Sprintf("(%d new!)", state.totalNew))
+
+	// Publish the same snapshot shown by Fyne. HTTP handlers only read this
+	// protected copy; they never touch the history slice or the widgets.
+	ui.overlay.publish(overlayData{
+		ThreeStarCount: state.threeStarCount,
+		FourStarCount:  state.fourStarCount,
+		FiveStarCount:  state.fiveStarCount,
+		SixStarCount:   state.sixStarCount,
+		PityCount:      state.pityCount,
+		TotalPullCount: state.totalPullCount,
+		ThreeStarNew:   state.threeStarNew,
+		FourStarNew:    state.fourStarNew,
+		FiveStarNew:    state.fiveStarNew,
+		SixStarNew:     state.sixStarNew,
+		TotalNew:       state.totalNew,
+		SixStarChance:  state.sixStarChance(),
+	})
 }
