@@ -46,6 +46,7 @@ func (s State) sixStarChance() int {
 }
 
 type UI struct {
+	overlay       *overlayStore
 	totalPulls    *widget.Label
 	pityCounter   *widget.Label
 	sixStarChance *widget.Label
@@ -67,6 +68,7 @@ func initializeApp(log *Log) fyne.App {
 	a := app.New()
 	w := a.NewWindow("Arknights Pull Tracker by PhantomTheKitsune")
 	ui := &UI{
+		overlay:       &overlayStore{},
 		totalPulls:    widget.NewLabel(fmt.Sprintf("Total Pulls: %d", 0)),
 		pityCounter:   widget.NewLabel(fmt.Sprintf("Pity Count: %d", 0)),
 		sixStarChance: widget.NewLabel(fmt.Sprintf("6-Star Rate: %d%%", 2)),
@@ -161,7 +163,7 @@ func initializeApp(log *Log) fyne.App {
 		pushState(newState, log)
 		updateUI(log, ui)
 	})
-	w.SetContent(container.NewVBox(
+	content := container.NewVBox(
 		container.NewHBox(ui.undo, ui.redo, ui.reset),
 		container.NewHBox(ui.pityCounter, ui.sixStarChance),
 		container.NewHBox(ui.sixStars, ui.sixNew),
@@ -169,8 +171,21 @@ func initializeApp(log *Log) fyne.App {
 		container.NewHBox(ui.fourStars, ui.fourNew),
 		container.NewHBox(ui.threeStars, ui.threeNew),
 		container.NewHBox(ui.totalPulls, ui.totalNew),
-	))
+	)
+	w.SetContent(content)
 	updateUI(log, ui)
+	// updateUI publishes the initial counts before HTTP requests can arrive.
+	server, overlayErr := startOverlayServer(ui.overlay, overlayAddress)
+	if overlayErr == nil {
+		a.Lifecycle().SetOnStopped(func() {
+			_ = server.Close()
+		})
+	}
+	if overlayErr != nil {
+		message := widget.NewLabel(fmt.Sprintf("OBS overlay unavailable at %s\n%v\nIf the port is in use, close the other tracker instance or change overlayAddress in overlay.go.", overlayURL, overlayErr))
+		message.Wrapping = fyne.TextWrapWord
+		content.Add(message)
+	}
 	w.Show()
 	return a
 }
